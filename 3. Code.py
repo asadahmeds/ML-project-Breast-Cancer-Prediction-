@@ -75,42 +75,95 @@ from sklearn.preprocessing import StandardScaler
 X_train=StandardScaler().fit_transform(X_train)
 X_test=StandardScaler().fit_transform(X_test)
 
-# models/ Algorithms
+def models(X_train, Y_train):
+    # Logistic regression
+    from sklearn.linear_model import LogisticRegression
+    log = LogisticRegression(random_state=0)
+    log.fit(X_train, Y_train)
+        
+    # Decision Tree
+    from sklearn.tree import DecisionTreeClassifier
+    tree = DecisionTreeClassifier(random_state=0, criterion="entropy")
+    tree.fit(X_train, Y_train)
+        
+    # Random Forest
+    from sklearn.ensemble import RandomForestClassifier
+    forest = RandomForestClassifier(random_state=0, criterion="entropy", n_estimators=10)
+    forest.fit(X_train, Y_train)
+    
+    # K-Nearest Neighbors
+    from sklearn.neighbors import KNeighborsClassifier
+    knn = KNeighborsClassifier(n_neighbors=5)
+    knn.fit(X_train, Y_train)
+    
+    # Naive Bayes
+    from sklearn.naive_bayes import GaussianNB
+    nb = GaussianNB()
+    nb.fit(X_train, Y_train)
+        
+    # SVM
+    from sklearn.svm import SVC
+    svm = SVC(kernel='linear', random_state=0)
+    svm.fit(X_train, Y_train)
 
-def models(X_train,Y_train):
-        #logistic regression
-        from sklearn.linear_model import LogisticRegression
-        log=LogisticRegression(random_state=0)
-        log.fit(X_train,Y_train)
-        
-        
-        #Decision Tree
-        from sklearn.tree import DecisionTreeClassifier
-        tree=DecisionTreeClassifier(random_state=0,criterion="entropy")
-        tree.fit(X_train,Y_train)
-        
-        #Random Forest
-        from sklearn.ensemble import RandomForestClassifier
-        forest=RandomForestClassifier(random_state=0,criterion="entropy",n_estimators=10)
-        forest.fit(X_train,Y_train)
-        
-        print('[0]logistic regression accuracy:',log.score(X_train,Y_train))
-        print('[1]Decision tree accuracy:',tree.score(X_train,Y_train))
-        print('[2]Random forest accuracy:',forest.score(X_train,Y_train))
-        
-        return log,tree,forest
+    # Print accuracies
+    print('[0] Logistic regression accuracy:', log.score(X_train, Y_train))
+    print('[1] Decision tree accuracy:', tree.score(X_train, Y_train))
+    print('[2] Random forest accuracy:', forest.score(X_train, Y_train))
+    print('[3] K-Nearest Neighbors accuracy:', knn.score(X_train, Y_train))
+    print('[4] Naive Bayes accuracy:', nb.score(X_train, Y_train))
+    print('[5] SVM accuracy:', svm.score(X_train, Y_train))
+
+    # Return models
+    return log, tree, forest, knn, nb, svm
 
 model=models(X_train,Y_train)
 
-# testing the models/result
-
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import classification_report
-
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+model_names = [type(model[i]).__name__ for i in range(len(model))]
 for i in range(len(model)):
-    print("Model",i)
-    print(classification_report(Y_test,model[i].predict(X_test)))
-    print('Accuracy : ',accuracy_score(Y_test,model[i].predict(X_test)))
+    print("Model",i,":", model_names[i])
+    Y_pred = model[i].predict(X_test)
+    print("Confusion matrix:\n", confusion_matrix(Y_test, Y_pred))
+    print(classification_report(Y_test, Y_pred))
+    print("Accuracy: ", accuracy_score(Y_test, Y_pred))
+    print()
+    print()
+
+import matplotlib.pyplot as plt
+
+# Get accuracy scores for each model
+accuracy_scores = []
+for i in range(len(model)):
+    Y_pred = model[i].predict(X_test)
+    accuracy_scores.append(accuracy_score(Y_test, Y_pred))
+
+# Plot bar chart with adjusted y-axis limits
+model_names = [type(model[i]).__name__ for i in range(len(model))]
+plt.bar(model_names, accuracy_scores)
+plt.xticks(rotation=45)
+plt.xlabel('Model')
+plt.ylabel('Accuracy')
+plt.title('Accuracy of Different Models')
+plt.ylim(0.90, 1.0) # set the y-axis limits to zoom in
+plt.show()
+
+import matplotlib.pyplot as plt
+
+# Get accuracy scores for each model
+accuracy_scores = []
+for i in range(len(model)):
+    Y_pred = model[i].predict(X_test)
+    accuracy_scores.append(accuracy_score(Y_test, Y_pred))
+
+# Plot line chart
+model_names = [type(model[i]).__name__ for i in range(len(model))]
+plt.plot(model_names, accuracy_scores,'-o')
+plt.xticks(rotation=45)
+plt.xlabel('Model')
+plt.ylabel('Accuracy')
+plt.title('Accuracy of Different Models')
+plt.show()
 
 # prediction of random-forest
 pred=model[2].predict(X_test)
